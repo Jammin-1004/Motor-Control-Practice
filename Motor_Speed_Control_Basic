@@ -1,0 +1,37 @@
+// Motor Pin Number
+int Int1 = 3;
+int Int2 = 4;
+int ENA1 = 10;
+
+// Define Motor Control Output Pin Number 
+void setup() {
+  pinMode(Int1, OUTPUT); // IN1
+  pinMode(Int2, OUTPUT); // IN2
+  pinMode(ENA1, OUTPUT); // EN1 (Speed Control)
+}
+
+// How to Active Motor
+void loop() {
+  // CCW
+  digitalWrite(Int1, HIGH); 
+  digitalWrite(Int2, LOW);
+  analogWrite(ENA1, 255); //Motor Speed Max
+  delay(2000);
+  
+  // CCW & STOP , Not analog Write -> Motor Play.
+  digitalWrite(Int1, HIGH);
+  digitalWrite(Int2, LOW);
+  analogWrite(ENA1, 0);
+  delay(2000);
+
+  // CW
+  digitalWrite(Int1, LOW);
+  digitalWrite(Int2, HIGH);
+  analogWrite(ENA1, 52); // Motor Speed 1/5 -> 51 is so weak, 
+  delay(2000);
+
+  //Stop
+  digitalWrite(Int1, LOW);
+  digitalWrite(Int2, LOW);
+  delay(2000);
+}
