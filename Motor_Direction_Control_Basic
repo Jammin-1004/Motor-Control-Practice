@@ -1,8 +1,8 @@
-// Motor Pin Number
+// Define Motor Pin Number
 int Int1 = 4;
 int Int2 = 5;
 
-// Define Motor Control Output Pin Number 
+// Define Control Output Pin Number 
 void setup() {
   pinMode(Int1, OUTPUT); // IN1
   pinMode(Int2, OUTPUT); // IN2
