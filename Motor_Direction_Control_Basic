@@ -1,0 +1,30 @@
+// Define Motor Control Pin Number 
+void setup() {
+  pinMode(4, OUTPUT); // IN1
+  pinMode(5, OUTPUT); // IN2
+}
+int Motor1_1 = 4;
+int Motor1_2 = 5;
+
+// How to Active Motor
+void loop() {
+  // CCW
+  digitalWrite(Motor1_1, HIGH); 
+  digitalWrite(Motor1_2, LOW);
+  delay(2000);
+
+  //Stop
+  digitalWrite(Motor1_1, HIGH);
+  digitalWrite(Motor1_2, HIGH);
+  delay(2000);
+ 
+  // CW
+  digitalWrite(Motor1_1, LOW);
+  digitalWrite(Motor1_2, HIGH);
+  delay(2000);
+  
+  //Stop
+  digitalWrite(Motor1_1, LOW);
+  digitalWrite(Motor1_2, LOW);
+  delay(2000);
+}
