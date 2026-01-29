@@ -1,0 +1,21 @@
+// PPR(Pulse Per Revolutuon) 측정용 단순 코드 ( Rotoate Motor 1 Round and Check Pulse Count )
+#define EncoderPin 4 // 엔코더 A상 연결 핀
+
+volatile long pulseCount = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(EncoderPin, INPUT_PULLUP);
+  
+  attachInterrupt(digitalPinToInterrupt(EncoderPin), encoderISR, RISING);
+}
+
+void loop() {
+  Serial.print("Current Pulse Count: ");
+  Serial.println(pulseCount);
+  delay(100);
+}
+
+void encoderISR() {
+  pulseCount++;
+}
