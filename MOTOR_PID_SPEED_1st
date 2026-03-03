@@ -1,0 +1,111 @@
+// Arduino Due 핀 정의
+#define MotorPin1 6   
+#define MotorPin2 7   
+#define PwmPin 8
+
+#define EncoderPin1 3
+#define EncoderPin2 4 
+#define CurrentSens A0
+
+// PID Gain 
+double kp = 0.7;   // Proportional
+double ki = 4.1;   // integral  
+double kd = 0.001 ;  // diffrential
+
+// Goal RPM ( 30 RPM too slow, so start 60 RPM )
+const int targetRPM = 125; 
+
+// PPR
+const int PPR = 108; 
+
+const int minPWM = 52;
+
+volatile long encoderPos = 0;
+unsigned long lastTime = 0;
+double integral = 0;
+double lastError = 0;
+
+void countEncoder() {
+  encoderPos++;
+}
+
+void setup() {
+  pinMode(MotorPin1, OUTPUT);
+  pinMode(MotorPin2, OUTPUT);
+  pinMode(PwmPin, OUTPUT);
+  pinMode(EncoderPin1, INPUT_PULLUP);
+  pinMode(EncoderPin2, INPUT_PULLUP);
+  pinMode(CurrentSens, INPUT);
+
+  attachInterrupt(digitalPinToInterrupt(EncoderPin2), countEncoder, RISING);
+
+  Serial.begin(9600);
+  delay(1000); 
+  Serial.println("System Start");
+}
+
+// +
+const double dt = 0.05;
+const int looptime = 50; 
+
+
+void loop() {
+
+  if (millis() - lastTime >= looptime) { 
+    
+    long currentPos = encoderPos;
+    encoderPos = 0; 
+    
+    // RPM 계산 (200ms 기준)
+    // 공식: (카운트 / 108) * 600
+    double currentRPM = (currentPos / (double)PPR) * 300.0; 
+
+    // PID 계산
+    double error = targetRPM - currentRPM;
+    
+    // 적분 누적 제한 (Windup 방지)
+    integral += error * dt;
+    integral = constrain(integral, -1000, 1000);
+
+    double derivative = (error - lastError) / dt;
+    
+    double output = (kp * error) + (ki * integral) + (kd * derivative);
+    
+    lastError = error;
+    lastTime = millis();
+
+    motorControl(output);
+
+    // Debugging & 
+    Serial.print(targetRPM); // Serial Plotter Graph, Blue Color
+    Serial.print(",");
+    Serial.print(currentRPM); // Serial Plotter Graph, Red Color
+    Serial.print(",");
+    Serial.println(output); // Serial Plotter Graph, Green COlor 
+  }
+}
+
+void motorControl(double pidValue) {
+  int pwmValue = (int)abs(pidValue); 
+  
+  // PWM 최대치 제한
+  if (pwmValue > 255) pwmValue = 255;
+  
+  // 아주 작은 PWM은 모터가 반응 안 할 수 있으므로 최소값 보정 (옵션)
+  if (pwmValue < minPWM && pwmValue > 0) 
+    pwmValue = minPWM;
+
+  if (pidValue > 0) {
+    digitalWrite(MotorPin1, HIGH);
+    digitalWrite(MotorPin2, LOW);
+  } else if (pidValue < 0) {
+    digitalWrite(MotorPin1, LOW);
+    digitalWrite(MotorPin2, HIGH);
+  } else {
+    digitalWrite(MotorPin1, LOW);
+    digitalWrite(MotorPin2, LOW);
+    pwmValue = 0;
+  }
+  
+  analogWrite(PwmPin, pwmValue);
+}
